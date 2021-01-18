@@ -6,9 +6,25 @@ import {TextField, Button} from "@material-ui/core";
 
 const mopidy = SingletonMopidyPlaybackManager.getMopidyInstance();
 
+function SearchBar(props) {
+    const [searchValue, updateSearchValue] = useState('');
+
+    const search = async () => {
+        const result = await SingletonMopidyPlaybackManager.search('artist', searchValue);
+        const allTracks = result[0].tracks;
+        props.updateTracks(allTracks);
+    }
+
+    return <div className={"search-bar-container"}>
+        <TextField value={searchValue} onChange={(event) => updateSearchValue(event.target.value)} className={"search-bar"} label={"Search by Artist"}/>
+        <Button onClick={search}>
+            Search
+        </Button>
+    </div>;
+}
+
 export function JukeboxWebInterface() {
     const [tracks, updateTracks] = useState([]);
-    const [currentSearch, updateSearch] = useState('Mac Miller');
     const [currentlyPlayingTrack, updateCurrentlyPlayingTrack] = useState(null);
     const [trackImages, updateTrackImages] = useState({});
     const [currentlyViewingIndex, updateCurrentlyViewingIndex] = useState(null);
@@ -18,7 +34,7 @@ export function JukeboxWebInterface() {
             online: async () => {
                 const currentlyPlayingTrack = await SingletonMopidyPlaybackManager.getCurrentlyPlayingTrack();
                 updateCurrentlyPlayingTrack(currentlyPlayingTrack);
-                await search(currentSearch);
+                await search('Mac Miller');
             }
         })
     }, []);
@@ -41,7 +57,6 @@ export function JukeboxWebInterface() {
     const search = async (searchTerm) => {
         const result = await SingletonMopidyPlaybackManager.search('artist', searchTerm);
         const allTracks = result[0].tracks;
-        updateSearch(searchTerm);
         updateTracks(allTracks);
     }
 
@@ -97,16 +112,7 @@ export function JukeboxWebInterface() {
             </div>
             <PlaybackControls/>
         </div>
-        <div className={'search-bar-container'}>
-            <TextField className={'search-bar'} label={'Search by Artist'}/>
-            <Button onClick={async () => {
-                // @ts-ignore
-                const searchTerm = document.getElementsByClassName('search-bar')[0].value;
-                await search(searchTerm);
-            }}>
-                Search
-            </Button>
-        </div>
+        <SearchBar updateTracks={updateTracks}/>
         <div style={{textAlign: "center"}}>
             <div
                 style={{display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "center"}}>
