@@ -22,4 +22,23 @@
     align-items: center;
     padding: 0 16px;
   }
+
+  .search-bar-container {
+    display: flex;
+    flex-direction: column;
+
+  }
+
+  .playback-controls {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    button {
+      color: white;
+    }
+  }
+
+  .song-info-container {
+    width: 200px;
+  }
 }

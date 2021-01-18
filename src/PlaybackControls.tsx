@@ -1,19 +1,20 @@
 import {SingletonMopidyPlaybackManager} from "./SingletonMopidyPlaybackManager";
 import React from "react";
+import {Button} from "@material-ui/core";
 
 export function PlaybackControls() {
-    return <div>
-        <button onClick={SingletonMopidyPlaybackManager.playNextSongInQueue}>
-            Next song.
-        </button>
-        <button onClick={SingletonMopidyPlaybackManager.resume}>
-            Resume.
-        </button>
-        <button onClick={SingletonMopidyPlaybackManager.pause}>
-            Pause.
-        </button>
-        <button onClick={SingletonMopidyPlaybackManager.stop}>
-            Stop.
-        </button>
+    return <div className={'playback-controls'}>
+        <Button onClick={SingletonMopidyPlaybackManager.playNextSongInQueue}>
+            Next song
+        </Button>
+        <Button onClick={SingletonMopidyPlaybackManager.resume}>
+            Resume
+        </Button>
+        <Button onClick={SingletonMopidyPlaybackManager.pause}>
+            Pause
+        </Button>
+        <Button onClick={SingletonMopidyPlaybackManager.stop}>
+            Stop
+        </Button>
     </div>;
 }

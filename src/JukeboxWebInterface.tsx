@@ -2,6 +2,7 @@ import React, {useEffect, useState} from "react";
 import {SingletonMopidyPlaybackManager} from "./SingletonMopidyPlaybackManager";
 import {TrackPlaybackMenu} from "./TrackPlaybackMenu";
 import {PlaybackControls} from "./PlaybackControls";
+import {TextField, Button} from "@material-ui/core";
 
 const mopidy = SingletonMopidyPlaybackManager.getMopidyInstance();
 
@@ -76,35 +77,36 @@ export function JukeboxWebInterface() {
         <div className={'currently-playing-toolbar'}>
             {currentlyPlayingTrack && currentlyPlayingSongImageUrl &&
             <div className={'toolbar-track-info-container'}>
-                <div style={{paddingRight: "16px"}}>
+                <div>
                     <img
                         src={currentlyPlayingSongImageUrl}
                         alt={"currently playing"}
                         width={64}
                         height={64}/>
                 </div>
-                <div>
-                    <div>
-                        {currentlyPlayingTrack ? currentlyPlayingTrack.name : "-"}
-                    </div>
-                    <div>
-                        {currentlyPlayingTrack ? currentlyPlayingTrack.artists[0].name : "-"}
-                    </div>
-                </div>
+
             </div>
             }
+            <div className={'song-info-container'}>
+                <div>
+                    {currentlyPlayingTrack ? currentlyPlayingTrack.name : "-"}
+                </div>
+                <div>
+                    {currentlyPlayingTrack ? currentlyPlayingTrack.artists[0].name : "-"}
+                </div>
+            </div>
+            <PlaybackControls/>
         </div>
-        <div>
-            <input type={"text"} className={"search-bar"}/>
-            <button onClick={async () => {
+        <div className={'search-bar-container'}>
+            <TextField className={'search-bar'} label={'Search by Artist'}/>
+            <Button onClick={async () => {
                 // @ts-ignore
                 const searchTerm = document.getElementsByClassName('search-bar')[0].value;
                 await search(searchTerm);
             }}>
                 Search
-            </button>
+            </Button>
         </div>
-        <PlaybackControls/>
         <div style={{textAlign: "center"}}>
             <div
                 style={{display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "center"}}>

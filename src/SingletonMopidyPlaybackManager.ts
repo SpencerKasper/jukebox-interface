@@ -8,7 +8,7 @@ export class SingletonMopidyPlaybackManager {
     private static mopidy;
 
     static async startMopidy({online}: MopidyEventCallbacks) {
-        const mopidyInstance = this.getMopidyInstance();
+        const mopidyInstance = SingletonMopidyPlaybackManager.getMopidyInstance();
         // @ts-ignore
         window.mopidy = mopidyInstance;
         mopidyInstance.on("state:online", online);
@@ -24,7 +24,7 @@ export class SingletonMopidyPlaybackManager {
     }
 
     static async clearAllAndPlay(track) {
-        const mopidyInstance = this.getMopidyInstance();
+        const mopidyInstance = SingletonMopidyPlaybackManager.getMopidyInstance();
         await mopidyInstance.tracklist.clear();
         await mopidyInstance.tracklist.add({tracks: [track]});
         // @ts-ignore
@@ -32,12 +32,12 @@ export class SingletonMopidyPlaybackManager {
     }
 
     static async playNextSongInQueue() {
-        const mopidyInstance = this.getMopidyInstance();
+        const mopidyInstance = SingletonMopidyPlaybackManager.getMopidyInstance();
         await mopidyInstance.playback.next();
     }
 
     static async addSongToQueue(track) {
-        const mopidyInstance = this.getMopidyInstance();
+        const mopidyInstance = SingletonMopidyPlaybackManager.getMopidyInstance();
         await mopidyInstance.tracklist.add({tracks: [track]});
         if (await mopidyInstance.playback.getState() !== 'playing') {
             // @ts-ignore
@@ -46,33 +46,33 @@ export class SingletonMopidyPlaybackManager {
     }
 
     static async resume() {
-        const mopidyInstance = this.getMopidyInstance();
+        const mopidyInstance = SingletonMopidyPlaybackManager.getMopidyInstance();
         await mopidyInstance.playback.resume();
     }
 
     static async pause() {
-        const mopidyInstance = this.getMopidyInstance();
+        const mopidyInstance = SingletonMopidyPlaybackManager.getMopidyInstance();
         await mopidyInstance.playback.pause();
 
     }
 
     static async stop() {
-        const mopidyInstance = this.getMopidyInstance();
+        const mopidyInstance = SingletonMopidyPlaybackManager.getMopidyInstance();
         await mopidyInstance.playback.stop();
     }
 
     static async getCurrentlyPlayingTrack() {
-        const mopidyInstance = this.getMopidyInstance();
+        const mopidyInstance = SingletonMopidyPlaybackManager.getMopidyInstance();
         return await mopidyInstance.playback.getCurrentTrack();
     }
 
     static async search(queryField, searchTerm) {
-        const mopidyInstance = this.getMopidyInstance();
+        const mopidyInstance = SingletonMopidyPlaybackManager.getMopidyInstance();
         return await mopidyInstance.library.search({query: {[queryField]: [searchTerm]}});
     }
 
     static async getImagesForTracks(tracks, callback) {
-        const mopidyInstance = this.getMopidyInstance();
+        const mopidyInstance = SingletonMopidyPlaybackManager.getMopidyInstance();
         if (tracks.length > 0) {
             const uris = tracks.map(track => track.uri);
             mopidyInstance.library
@@ -84,7 +84,7 @@ export class SingletonMopidyPlaybackManager {
     }
 
     static async getListOfPlaylists() {
-        const mopidyInstance = this.getMopidyInstance();
+        const mopidyInstance = SingletonMopidyPlaybackManager.getMopidyInstance();
         await mopidyInstance.playlists.asList();
     }
 }
