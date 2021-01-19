@@ -22,10 +22,14 @@
     padding: 0 16px;
   }
 
+  .search-type-container {
+    padding-right: 16px;
+  }
+
   .search-bar-container {
     display: flex;
-    flex-direction: column;
-
+    flex-direction: row;
+    align-items: flex-end;
   }
 
   .album-art-with-song-info {

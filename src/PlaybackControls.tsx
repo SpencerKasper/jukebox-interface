@@ -1,6 +1,5 @@
 import {SingletonMopidyPlaybackManager} from "./SingletonMopidyPlaybackManager";
 import React, {useEffect, useState} from "react";
-import {Button} from "@material-ui/core";
 import nextButtonSvg from './static/images/next-button.svg';
 import pauseButtonSvg from './static/images/pause-button.svg';
 import stopButtonSvg from './static/images/stop-button.svg';

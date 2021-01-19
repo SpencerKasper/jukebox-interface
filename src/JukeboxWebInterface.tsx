@@ -2,27 +2,9 @@ import React, {useEffect, useState} from "react";
 import {SingletonMopidyPlaybackManager} from "./SingletonMopidyPlaybackManager";
 import {TrackPlaybackMenu} from "./TrackPlaybackMenu";
 import {PlaybackControls} from "./PlaybackControls";
-import {TextField, Button} from "@material-ui/core";
+import {SearchBar} from "./SearchBar";
 
 const mopidy = SingletonMopidyPlaybackManager.getMopidyInstance();
-
-function SearchBar(props) {
-    const [searchValue, updateSearchValue] = useState('');
-
-    const search = async () => {
-        const result = await SingletonMopidyPlaybackManager.search('artist', searchValue);
-        const allTracks = result[0].tracks;
-        props.updateTracks(allTracks);
-    }
-
-    return <div className={"search-bar-container"}>
-        <TextField value={searchValue} onChange={(event) => updateSearchValue(event.target.value)}
-                   className={"search-bar"} label={"Search by Artist"}/>
-        <Button onClick={search}>
-            Search
-        </Button>
-    </div>;
-}
 
 export function JukeboxWebInterface() {
     const [tracks, updateTracks] = useState([]);
