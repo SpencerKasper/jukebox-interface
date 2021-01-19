@@ -8,15 +8,14 @@
   .currently-playing-toolbar {
     display: flex;
     flex-direction: row;
-    background-color: black;
-    color: white;
+    background: #00ddff;
     width: 100%;
     bottom: 0;
     padding: 16px;
     position: fixed;
   }
 
-  .toolbar-track-info-container {
+  .currently-playing-album-art-container {
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -29,16 +28,32 @@
 
   }
 
-  .playback-controls {
-    width: 100%;
+  .album-art-with-song-info {
+    width: 30%;
     display: flex;
+    flex-direction: row;
     justify-content: center;
-    button {
-      color: white;
-    }
+    align-items: center;
   }
 
-  .song-info-container {
-    width: 200px;
+  .playback-controls {
+    width: 40%;
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    align-items: center;
+  }
+
+  .to-center-playback {
+    width: 30%;
+  }
+
+  .playback-svg {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
   }
 }

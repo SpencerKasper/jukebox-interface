@@ -83,6 +83,12 @@ export class SingletonMopidyPlaybackManager {
         }
     }
 
+    static async getPlaybackState() {
+        const mopidyInstance = SingletonMopidyPlaybackManager.getMopidyInstance();
+        console.error(mopidyInstance.playback);
+        return await mopidyInstance.playback.getState();
+    }
+
     static async getListOfPlaylists() {
         const mopidyInstance = SingletonMopidyPlaybackManager.getMopidyInstance();
         await mopidyInstance.playlists.asList();

@@ -16,7 +16,8 @@ function SearchBar(props) {
     }
 
     return <div className={"search-bar-container"}>
-        <TextField value={searchValue} onChange={(event) => updateSearchValue(event.target.value)} className={"search-bar"} label={"Search by Artist"}/>
+        <TextField value={searchValue} onChange={(event) => updateSearchValue(event.target.value)}
+                   className={"search-bar"} label={"Search by Artist"}/>
         <Button onClick={search}>
             Search
         </Button>
@@ -90,27 +91,27 @@ export function JukeboxWebInterface() {
 
     return <div className={'jukebox-web-interface'}>
         <div className={'currently-playing-toolbar'}>
-            {currentlyPlayingTrack && currentlyPlayingSongImageUrl &&
-            <div className={'toolbar-track-info-container'}>
-                <div>
+            <div className={'album-art-with-song-info'}>
+                {currentlyPlayingTrack && currentlyPlayingSongImageUrl &&
+                <div className={'currently-playing-album-art-container'}>
                     <img
                         src={currentlyPlayingSongImageUrl}
                         alt={"currently playing"}
                         width={64}
                         height={64}/>
                 </div>
-
-            </div>
-            }
-            <div className={'song-info-container'}>
+                }
                 <div>
-                    {currentlyPlayingTrack ? currentlyPlayingTrack.name : "-"}
-                </div>
-                <div>
-                    {currentlyPlayingTrack ? currentlyPlayingTrack.artists[0].name : "-"}
+                    <div>
+                        {currentlyPlayingTrack ? currentlyPlayingTrack.name : "-"}
+                    </div>
+                    <div>
+                        {currentlyPlayingTrack ? currentlyPlayingTrack.artists[0].name : "-"}
+                    </div>
                 </div>
             </div>
             <PlaybackControls/>
+            <div className={'to-center-playback'}/>
         </div>
         <SearchBar updateTracks={updateTracks}/>
         <div style={{textAlign: "center"}}>
