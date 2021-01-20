@@ -6,40 +6,65 @@ import {SearchBar} from "./SearchBar";
 
 const mopidy = SingletonMopidyPlaybackManager.getMopidyInstance();
 
+let interval;
+
 export function JukeboxWebInterface() {
-    const [tracks, updateTracks] = useState([]);
+    const [searchResults, updateSearchResults] = useState([]);
     const [currentlyPlayingTrack, updateCurrentlyPlayingTrack] = useState(null);
-    const [trackImages, updateTrackImages] = useState({});
+    const [currentlyPlayingTrackImage, updateCurrentlyPlayingTrackImage] = useState({});
+    const [searchResultImages, updateSearchResultTrackImages] = useState({});
     const [currentlyViewingIndex, updateCurrentlyViewingIndex] = useState(null);
-    const [queue, updateQueue] = useState([]);
+    const [currentPlaybackTime, updateCurrentPlaybackTime] = useState(0);
+
+    async function updateCurrentlyPlayingTrackInfo() {
+        const currentlyPlayingTrack = await SingletonMopidyPlaybackManager.getCurrentlyPlayingTrack();
+        updateCurrentlyPlayingTrack(currentlyPlayingTrack);
+        await SingletonMopidyPlaybackManager.getImagesForTracks([currentlyPlayingTrack], (images) => {
+            updateCurrentlyPlayingTrackImage(images);
+        });
+    }
+
+    function beginPlaybackTimeQueryLoop() {
+        interval = setInterval(async () => {
+            const playbackTime = await SingletonMopidyPlaybackManager.getCurrentPlaybackTime();
+            updateCurrentPlaybackTime(playbackTime);
+        }, 1000)
+    }
 
     useEffect(() => {
         SingletonMopidyPlaybackManager.startMopidy({
             online: async () => {
-                const currentlyPlayingTrack = await SingletonMopidyPlaybackManager.getCurrentlyPlayingTrack();
-                updateCurrentlyPlayingTrack(currentlyPlayingTrack);
+                await updateCurrentlyPlayingTrackInfo();
                 await SingletonMopidyPlaybackManager.getListOfPlaylists();
-                await search('Mac Miller');
+                await performDefaultSearch('Mac Miller');
+                if (await SingletonMopidyPlaybackManager.getPlaybackState() === 'playing') {
+                    await beginPlaybackTimeQueryLoop();
+                }
             },
-            tracklistChanged: async () => {
-                const queue = await SingletonMopidyPlaybackManager.getQueue();
-                updateQueue(queue);
+            trackPlaybackStarted: async () => {
+                await updateCurrentlyPlayingTrackInfo();
+                await beginPlaybackTimeQueryLoop();
+            },
+            trackPlaybackEnded: async () => {
+                clearInterval(interval);
+            },
+            playbackStateChanged: async ({old_state, new_state}) => {
+                if (new_state !== 'playing') {
+                    clearInterval(interval)
+                }
             }
         })
+        return () => clearInterval(interval);
     }, []);
 
     useEffect(() => {
-        console.error('queue: ', queue);
-    }, [queue]);
-
-    useEffect(() => {
         mopidy.on('event:trackPlaybackStarted', getTrackPlaybackStartedHandler())
-        SingletonMopidyPlaybackManager.getImagesForTracks(tracks, updateTrackImages);
-    }, [tracks]);
+        SingletonMopidyPlaybackManager.getImagesForTracks(searchResults, updateSearchResultTrackImages);
+    }, [searchResults]);
 
     const getTrackPlaybackStartedHandler = () => {
         return async (newTrack) => {
-            tracks.forEach((track, index) => {
+            searchResults.forEach((track, index) => {
                 if (track.uri === newTrack.tl_track.track.uri) {
                     updateCurrentlyPlayingTrack(track);
                 }
@@ -47,21 +72,21 @@ export function JukeboxWebInterface() {
         }
     }
 
-    const search = async (searchTerm) => {
+    const performDefaultSearch = async (searchTerm) => {
         const result = await SingletonMopidyPlaybackManager.search('artist', searchTerm);
         const allTracks = result[0].tracks;
-        updateTracks(allTracks);
+        updateSearchResults(allTracks);
     }
 
     const playSongAtIndex = async (index) => {
         console.error('playing song at index: ', index);
-        const track = tracks[index];
+        const track = searchResults[index];
         await SingletonMopidyPlaybackManager.clearAllAndPlay(track);
         updateCurrentlyPlayingTrack(track);
     }
 
     const addSongAtIndexToQueue = async (index) => {
-        const track = tracks[index];
+        const track = searchResults[index];
         await SingletonMopidyPlaybackManager.addSongToQueue(track);
     }
 
@@ -77,8 +102,8 @@ export function JukeboxWebInterface() {
         setAnchorEl(null);
     };
 
-    const currentlyPlayingSongImageUrl = currentlyPlayingTrack && trackImages && trackImages[currentlyPlayingTrack.uri] ?
-        trackImages[currentlyPlayingTrack.uri][0].uri :
+    const currentlyPlayingSongImageUrl = currentlyPlayingTrack && currentlyPlayingTrackImage && currentlyPlayingTrackImage[currentlyPlayingTrack.uri] ?
+        currentlyPlayingTrackImage[currentlyPlayingTrack.uri][0].uri :
         '';
 
     return <div className={'jukebox-web-interface'}>
@@ -102,17 +127,25 @@ export function JukeboxWebInterface() {
                     </div>
                 </div>
             </div>
-            <PlaybackControls currentlyPlayingTrack={currentlyPlayingTrack}/>
+            <PlaybackControls
+                currentlyPlayingTrack={currentlyPlayingTrack}
+                currentPlaybackTime={currentPlaybackTime}
+                beginPlaybackTimeQueryLoop={beginPlaybackTimeQueryLoop}
+                cancelPlaybackTimeQueryLoop={() => {
+                    clearInterval(interval);
+                }}
+                updateCurrentPlaybackTime={updateCurrentPlaybackTime}
+            />
             <div className={'to-center-playback'}/>
         </div>
-        <SearchBar updateTracks={updateTracks}/>
+        <SearchBar updateTracks={updateSearchResults}/>
         <div style={{textAlign: "center"}}>
             <div
                 style={{display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "center"}}>
                 {
-                    tracks.length && trackImages !== {} && tracks.map((track, index) => {
-                        const imageUrl = trackImages && trackImages[track.uri] ?
-                            trackImages[track.uri][0].uri :
+                    searchResults.length && searchResultImages !== {} && searchResults.map((track, index) => {
+                        const imageUrl = searchResultImages && searchResultImages[track.uri] ?
+                            searchResultImages[track.uri][0].uri :
                             '';
                         return (
                             <div style={{

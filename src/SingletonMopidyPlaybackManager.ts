@@ -1,21 +1,31 @@
 import Mopidy from "mopidy";
 
 export interface MopidyEventCallbacks {
-    online: () => Promise<void>;
-    tracklistChanged: () => Promise<void>;
+    online?: () => Promise<void>;
+    tracklistChanged?: () => Promise<void>;
+    trackPlaybackStarted?: () => Promise<void>;
+    trackPlaybackEnded?: () => Promise<void>;
+    playbackStateChanged?: ({old_state, new_state}) => Promise<void>;
 }
 
 export class SingletonMopidyPlaybackManager {
     private static mopidy;
 
-    static async startMopidy({online, tracklistChanged}: MopidyEventCallbacks) {
+    static async startMopidy({
+                                 online,
+                                 tracklistChanged,
+                                 trackPlaybackStarted,
+                                 trackPlaybackEnded,
+                                 playbackStateChanged,
+                             }: MopidyEventCallbacks) {
         const mopidyInstance = SingletonMopidyPlaybackManager.getMopidyInstance();
         // @ts-ignore
         window.mopidy = mopidyInstance;
         mopidyInstance.on("state:online", online);
-        mopidyInstance.on('event:playbackStateChanged', ({old_state, new_state}) => null);
-        mopidyInstance.on('event:tracklistChanged', tracklistChanged);
-        mopidyInstance.on('event:trackPlaybackPaused', () => null);
+        mopidyInstance.on('event:playbackStateChanged', playbackStateChanged);
+        tracklistChanged && mopidyInstance.on('event:tracklistChanged', tracklistChanged);
+        mopidyInstance.on('event:trackPlaybackEnded', trackPlaybackEnded);
+        mopidyInstance.on('event:trackPlaybackStarted', trackPlaybackStarted);
         mopidyInstance.on('state', console.error);
         mopidyInstance.on('event', console.error);
     };
@@ -80,8 +90,9 @@ export class SingletonMopidyPlaybackManager {
 
     static async getImagesForTracks(tracks, callback) {
         const mopidyInstance = SingletonMopidyPlaybackManager.getMopidyInstance();
-        if (tracks.length > 0) {
-            const uris = tracks.map(track => track.uri);
+        const filteredTracks = tracks.filter(track => track);
+        if (filteredTracks.length > 0) {
+            const uris = filteredTracks.map(track => track.uri);
             mopidyInstance.library
                 .getImages({uris})
                 .then((result) => callback(result));
@@ -109,5 +120,10 @@ export class SingletonMopidyPlaybackManager {
     static async seek(newTimeInSeconds: number) {
         const mopidyInstance = SingletonMopidyPlaybackManager.getMopidyInstance();
         await mopidyInstance.playback.seek({time_position: newTimeInSeconds});
+    }
+
+    static async getCurrentPlaybackTime() {
+        const mopidyInstance = SingletonMopidyPlaybackManager.getMopidyInstance();
+        return await mopidyInstance.playback.getTimePosition();
     }
 }
