@@ -1,5 +1,5 @@
 import {SingletonMopidyPlaybackManager} from "./SingletonMopidyPlaybackManager";
-import React, {useEffect, useState} from "react";
+import React from "react";
 import nextButtonSvg from './static/images/next-button.svg';
 import pauseButtonSvg from './static/images/pause-button.svg';
 import stopButtonSvg from './static/images/stop-button.svg';
@@ -42,15 +42,16 @@ export function PlaybackControls({
                     }}
                     valueLabelFormat={(value) => {
                         const totalSeconds = value / 1000;
-                        const totalMinutes = (totalSeconds / 60).toFixed(1).split('.')[0];
+                        const totalMinutes = (totalSeconds / 60).toString().split('.')[0];
                         const totalMinutesInSeconds = Number(totalMinutes) * 60;
                         let seconds = ((totalSeconds - totalMinutesInSeconds)).toFixed(0);
+                        console.error(Number(seconds));
                         if (Number(seconds) < 10) {
                             seconds = `0${seconds}`
                         }
                         return `${totalMinutes}:${seconds}`;
                     }}
-                    valueLabelDisplay={'auto'}
+                    valueLabelDisplay={'on'}
                 />
             </div>
             <div className={'playback-buttons'}>
