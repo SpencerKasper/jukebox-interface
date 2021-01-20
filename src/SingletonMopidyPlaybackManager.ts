@@ -2,16 +2,22 @@ import Mopidy from "mopidy";
 
 export interface MopidyEventCallbacks {
     online: () => Promise<void>;
+    tracklistChanged: () => Promise<void>;
 }
 
 export class SingletonMopidyPlaybackManager {
     private static mopidy;
 
-    static async startMopidy({online}: MopidyEventCallbacks) {
+    static async startMopidy({online, tracklistChanged}: MopidyEventCallbacks) {
         const mopidyInstance = SingletonMopidyPlaybackManager.getMopidyInstance();
         // @ts-ignore
         window.mopidy = mopidyInstance;
         mopidyInstance.on("state:online", online);
+        mopidyInstance.on('event:playbackStateChanged', ({old_state, new_state}) => null);
+        mopidyInstance.on('event:tracklistChanged', tracklistChanged);
+        mopidyInstance.on('event:trackPlaybackPaused', () => null);
+        mopidyInstance.on('state', console.error);
+        mopidyInstance.on('event', console.error);
     };
 
     static getMopidyInstance() {
@@ -57,6 +63,7 @@ export class SingletonMopidyPlaybackManager {
     }
 
     static async stop() {
+        console.error('stop is called')
         const mopidyInstance = SingletonMopidyPlaybackManager.getMopidyInstance();
         await mopidyInstance.playback.stop();
     }
@@ -85,12 +92,22 @@ export class SingletonMopidyPlaybackManager {
 
     static async getPlaybackState() {
         const mopidyInstance = SingletonMopidyPlaybackManager.getMopidyInstance();
-        console.error(mopidyInstance.playback);
         return await mopidyInstance.playback.getState();
+    }
+
+    static async getQueue() {
+        const mopidyInstance = SingletonMopidyPlaybackManager.getMopidyInstance();
+        return await mopidyInstance.tracklist.getTracks();
     }
 
     static async getListOfPlaylists() {
         const mopidyInstance = SingletonMopidyPlaybackManager.getMopidyInstance();
-        await mopidyInstance.playlists.asList();
+        const playlists = await mopidyInstance.playlists.asList();
+        console.error(playlists);
+    }
+
+    static async seek(newTimeInSeconds: number) {
+        const mopidyInstance = SingletonMopidyPlaybackManager.getMopidyInstance();
+        await mopidyInstance.playback.seek({time_position: newTimeInSeconds});
     }
 }

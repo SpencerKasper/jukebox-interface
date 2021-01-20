@@ -11,16 +11,26 @@ export function JukeboxWebInterface() {
     const [currentlyPlayingTrack, updateCurrentlyPlayingTrack] = useState(null);
     const [trackImages, updateTrackImages] = useState({});
     const [currentlyViewingIndex, updateCurrentlyViewingIndex] = useState(null);
+    const [queue, updateQueue] = useState([]);
 
     useEffect(() => {
         SingletonMopidyPlaybackManager.startMopidy({
             online: async () => {
                 const currentlyPlayingTrack = await SingletonMopidyPlaybackManager.getCurrentlyPlayingTrack();
                 updateCurrentlyPlayingTrack(currentlyPlayingTrack);
+                await SingletonMopidyPlaybackManager.getListOfPlaylists();
                 await search('Mac Miller');
+            },
+            tracklistChanged: async () => {
+                const queue = await SingletonMopidyPlaybackManager.getQueue();
+                updateQueue(queue);
             }
         })
     }, []);
+
+    useEffect(() => {
+        console.error('queue: ', queue);
+    }, [queue]);
 
     useEffect(() => {
         mopidy.on('event:trackPlaybackStarted', getTrackPlaybackStartedHandler())
@@ -92,7 +102,7 @@ export function JukeboxWebInterface() {
                     </div>
                 </div>
             </div>
-            <PlaybackControls/>
+            <PlaybackControls currentlyPlayingTrack={currentlyPlayingTrack}/>
             <div className={'to-center-playback'}/>
         </div>
         <SearchBar updateTracks={updateTracks}/>
