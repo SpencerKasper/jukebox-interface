@@ -119,6 +119,12 @@ export class SingletonMopidyPlaybackManager {
 
     static async seek(newTimeInSeconds: number) {
         const mopidyInstance = SingletonMopidyPlaybackManager.getMopidyInstance();
+        const currentPlaybackTime = await SingletonMopidyPlaybackManager.getCurrentPlaybackTime();
+        if(newTimeInSeconds < currentPlaybackTime) {
+            // Stupid hack since rewinding doesn't work I guess.
+            await mopidyInstance.playback.seek({time_position: newTimeInSeconds - 1});
+            await mopidyInstance.playback.seek({time_position: newTimeInSeconds});
+        }
         await mopidyInstance.playback.seek({time_position: newTimeInSeconds});
     }
 
