@@ -1,13 +1,12 @@
 import React, {useEffect, useState} from "react";
 import {SingletonMopidyPlaybackManager} from "./SingletonMopidyPlaybackManager";
 import {TrackPlaybackMenu} from "./TrackPlaybackMenu";
-import {PlaybackControls} from "./PlaybackControls";
+import PlaybackControls from "./PlaybackControls";
 import {SearchBar} from "./SearchBar";
 import {VolumeControls} from "./VolumeControls";
+import currentPlaybackTimeStore from "./redux/stores/currentPlaybackTime.store";
 
 const mopidy = SingletonMopidyPlaybackManager.getMopidyInstance();
-
-let interval;
 
 export function JukeboxWebInterface() {
     const [searchResults, updateSearchResults] = useState([]);
@@ -15,7 +14,6 @@ export function JukeboxWebInterface() {
     const [currentlyPlayingTrackImage, updateCurrentlyPlayingTrackImage] = useState({});
     const [searchResultImages, updateSearchResultTrackImages] = useState({});
     const [currentlyViewingIndex, updateCurrentlyViewingIndex] = useState(null);
-    const [currentPlaybackTime, updateCurrentPlaybackTime] = useState(0);
 
     async function updateCurrentlyPlayingTrackInfo() {
         const currentlyPlayingTrack = await SingletonMopidyPlaybackManager.getCurrentlyPlayingTrack();
@@ -25,11 +23,13 @@ export function JukeboxWebInterface() {
         });
     }
 
-    function beginPlaybackTimeQueryLoop() {
-        interval = setInterval(async () => {
-            const playbackTime = await SingletonMopidyPlaybackManager.getCurrentPlaybackTime();
-            updateCurrentPlaybackTime(playbackTime);
-        }, 1000)
+    async function dispatchCurrentPlaybackTime() {
+        const currentPlaybackTime = await SingletonMopidyPlaybackManager.getCurrentPlaybackTime();
+
+        currentPlaybackTimeStore.dispatch({
+            type: 'playback/play',
+            payload: {playbackTime: currentPlaybackTime}
+        })
     }
 
     useEffect(() => {
@@ -39,23 +39,23 @@ export function JukeboxWebInterface() {
                 await SingletonMopidyPlaybackManager.getListOfPlaylists();
                 await performDefaultSearch('Mac Miller');
                 if (await SingletonMopidyPlaybackManager.getPlaybackState() === 'playing') {
-                    await beginPlaybackTimeQueryLoop();
+                    await dispatchCurrentPlaybackTime();
                 }
             },
             trackPlaybackStarted: async () => {
                 await updateCurrentlyPlayingTrackInfo();
-                await beginPlaybackTimeQueryLoop();
+                await dispatchCurrentPlaybackTime()
             },
             trackPlaybackEnded: async () => {
-                clearInterval(interval);
+                currentPlaybackTimeStore.dispatch({type: 'playback/stop'});
             },
             playbackStateChanged: async ({old_state, new_state}) => {
                 if (new_state !== 'playing') {
-                    clearInterval(interval)
+                    // clearInterval(interval)
                 }
             }
         })
-        return () => clearInterval(interval);
+        // return () => clearInterval(interval);
     }, []);
 
     useEffect(() => {
@@ -130,12 +130,6 @@ export function JukeboxWebInterface() {
             </div>
             <PlaybackControls
                 currentlyPlayingTrack={currentlyPlayingTrack}
-                currentPlaybackTime={currentPlaybackTime}
-                beginPlaybackTimeQueryLoop={beginPlaybackTimeQueryLoop}
-                cancelPlaybackTimeQueryLoop={() => {
-                    clearInterval(interval);
-                }}
-                updateCurrentPlaybackTime={updateCurrentPlaybackTime}
             />
             <VolumeControls/>
         </div>

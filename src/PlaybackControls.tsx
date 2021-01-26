@@ -5,37 +5,40 @@ import pauseButtonSvg from './static/images/pause-button.svg';
 import stopButtonSvg from './static/images/stop-button.svg';
 import resumeButtonSvg from './static/images/play-button.svg';
 import {JukeboxSlider} from "./theme/JukeboxSlider";
+import {useSelector} from 'react-redux';
+import currentPlaybackTimeStore from "./redux/stores/currentPlaybackTime.store";
 
-export function PlaybackControls({
-                                     cancelPlaybackTimeQueryLoop,
-                                     beginPlaybackTimeQueryLoop,
-                                     currentlyPlayingTrack,
-                                     currentPlaybackTime,
-                                     updateCurrentPlaybackTime
-                                 }) {
+function PlaybackControls({
+                              currentlyPlayingTrack,
+                          }) {
+    const currentPlaybackTime = useSelector((state) => state.playbackTime);
+
     const totalSongLengthInSeconds = currentlyPlayingTrack ?
         currentlyPlayingTrack.length :
         0;
+
+    const getLabelValueFormatter = () => (value) => {
+        const totalSeconds = value / 1000;
+        const totalMinutes = (totalSeconds / 60).toString().split('.')[0];
+        const totalMinutesInSeconds = Number(totalMinutes) * 60;
+        let seconds = ((totalSeconds - totalMinutesInSeconds)).toFixed(0);
+        if (Number(seconds) < 10) {
+            seconds = `0${seconds}`
+        }
+        return `${totalMinutes}:${seconds}`;
+    };
+
     return (
         <div className={'playback-controls'}>
-            <JukeboxSlider defaultValue={currentPlaybackTime}
+            <JukeboxSlider defaultValue={currentPlaybackTime.playbackTime}
                            min={0} step={1} max={totalSongLengthInSeconds} onMouseDown={() => {
-                cancelPlaybackTimeQueryLoop();
-            }} onMouseUp={() => {
-                beginPlaybackTimeQueryLoop();
+                currentPlaybackTimeStore.dispatch({type: 'playback/stop'});
+            }} onMouseUp={async () => {
+                const resumePlaybackTime = await SingletonMopidyPlaybackManager.getCurrentPlaybackTime();
+                currentPlaybackTimeStore.dispatch({type: 'playback/play', payload: {playbackTime: resumePlaybackTime}})
             }} onChangeCommitted={async (event, newValue) => {
                 await SingletonMopidyPlaybackManager.seek(newValue as number);
-            }} valueLabelFormat={(value) => {
-                const totalSeconds = value / 1000;
-                const totalMinutes = (totalSeconds / 60).toString().split('.')[0];
-                const totalMinutesInSeconds = Number(totalMinutes) * 60;
-                let seconds = ((totalSeconds - totalMinutesInSeconds)).toFixed(0);
-                console.error(Number(seconds));
-                if (Number(seconds) < 10) {
-                    seconds = `0${seconds}`
-                }
-                return `${totalMinutes}:${seconds}`;
-            }}/>
+            }} valueLabelFormat={getLabelValueFormatter()}/>
             <div className={'playback-buttons'}>
                 <div className={'playback-svg'}>
                     <img
@@ -71,3 +74,5 @@ export function PlaybackControls({
         </div>
     );
 }
+
+export default PlaybackControls;
