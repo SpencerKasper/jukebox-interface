@@ -15,9 +15,14 @@ export function JukeboxSlider(props: Props) {
         root: {
             color: 'black',
             height: 8,
+            display: 'flex',
+            alignItems: 'center',
         },
         valueLabel: {
             borderRadius: 'unset'
+        },
+        thumb: {
+            marginTop: '1px',
         }
     })(Slider);
 

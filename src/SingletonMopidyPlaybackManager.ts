@@ -136,4 +136,14 @@ export class SingletonMopidyPlaybackManager {
         const mopidyInstance = SingletonMopidyPlaybackManager.getMopidyInstance();
         return await mopidyInstance.mixer.getVolume();
     }
+
+    static async setMute(isMute: boolean) {
+        const mopidyInstance = SingletonMopidyPlaybackManager.getMopidyInstance();
+        return await mopidyInstance.mixer.setMute({mute: isMute});
+    }
+
+    static async getMute() {
+        const mopidyInstance = SingletonMopidyPlaybackManager.getMopidyInstance();
+        return await mopidyInstance.mixer.getMute();
+    }
 }
