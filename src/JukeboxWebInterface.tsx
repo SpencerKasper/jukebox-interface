@@ -3,6 +3,7 @@ import {SingletonMopidyPlaybackManager} from "./SingletonMopidyPlaybackManager";
 import {TrackPlaybackMenu} from "./TrackPlaybackMenu";
 import {PlaybackControls} from "./PlaybackControls";
 import {SearchBar} from "./SearchBar";
+import {VolumeControls} from "./VolumeControls";
 
 const mopidy = SingletonMopidyPlaybackManager.getMopidyInstance();
 
@@ -136,7 +137,7 @@ export function JukeboxWebInterface() {
                 }}
                 updateCurrentPlaybackTime={updateCurrentPlaybackTime}
             />
-            <div className={'to-center-playback'}/>
+            <VolumeControls/>
         </div>
         <SearchBar updateTracks={updateSearchResults}/>
         <div style={{textAlign: "center"}}>

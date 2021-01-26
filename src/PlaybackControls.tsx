@@ -4,7 +4,7 @@ import nextButtonSvg from './static/images/next-button.svg';
 import pauseButtonSvg from './static/images/pause-button.svg';
 import stopButtonSvg from './static/images/stop-button.svg';
 import resumeButtonSvg from './static/images/play-button.svg';
-import {Slider, withStyles} from "@material-ui/core";
+import {JukeboxSlider} from "./theme/JukeboxSlider";
 
 export function PlaybackControls({
                                      cancelPlaybackTimeQueryLoop,
@@ -13,47 +13,29 @@ export function PlaybackControls({
                                      currentPlaybackTime,
                                      updateCurrentPlaybackTime
                                  }) {
-    const StyledSlider = withStyles({
-        root: {
-            color: 'black',
-            height: 8,
-        }
-    })(Slider);
-
     const totalSongLengthInSeconds = currentlyPlayingTrack ?
         currentlyPlayingTrack.length :
         0;
     return (
         <div className={'playback-controls'}>
-            <div className={'slider'}>
-                <StyledSlider
-                    defaultValue={currentPlaybackTime}
-                    step={1}
-                    min={0}
-                    max={totalSongLengthInSeconds}
-                    onMouseDown={() => {
-                        cancelPlaybackTimeQueryLoop();
-                    }}
-                    onMouseUp={() => {
-                        beginPlaybackTimeQueryLoop();
-                    }}
-                    onChangeCommitted={async (event, newValue) => {
-                        await SingletonMopidyPlaybackManager.seek(newValue as number);
-                    }}
-                    valueLabelFormat={(value) => {
-                        const totalSeconds = value / 1000;
-                        const totalMinutes = (totalSeconds / 60).toString().split('.')[0];
-                        const totalMinutesInSeconds = Number(totalMinutes) * 60;
-                        let seconds = ((totalSeconds - totalMinutesInSeconds)).toFixed(0);
-                        console.error(Number(seconds));
-                        if (Number(seconds) < 10) {
-                            seconds = `0${seconds}`
-                        }
-                        return `${totalMinutes}:${seconds}`;
-                    }}
-                    valueLabelDisplay={'on'}
-                />
-            </div>
+            <JukeboxSlider defaultValue={currentPlaybackTime}
+                           min={0} step={1} max={totalSongLengthInSeconds} onMouseDown={() => {
+                cancelPlaybackTimeQueryLoop();
+            }} onMouseUp={() => {
+                beginPlaybackTimeQueryLoop();
+            }} onChangeCommitted={async (event, newValue) => {
+                await SingletonMopidyPlaybackManager.seek(newValue as number);
+            }} valueLabelFormat={(value) => {
+                const totalSeconds = value / 1000;
+                const totalMinutes = (totalSeconds / 60).toString().split('.')[0];
+                const totalMinutesInSeconds = Number(totalMinutes) * 60;
+                let seconds = ((totalSeconds - totalMinutesInSeconds)).toFixed(0);
+                console.error(Number(seconds));
+                if (Number(seconds) < 10) {
+                    seconds = `0${seconds}`
+                }
+                return `${totalMinutes}:${seconds}`;
+            }}/>
             <div className={'playback-buttons'}>
                 <div className={'playback-svg'}>
                     <img
