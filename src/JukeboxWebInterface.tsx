@@ -4,32 +4,43 @@ import {TrackPlaybackMenu} from "./TrackPlaybackMenu";
 import PlaybackControls from "./PlaybackControls";
 import {SearchBar} from "./SearchBar";
 import {VolumeControls} from "./VolumeControls";
-import currentPlaybackTimeStore from "./redux/stores/currentPlaybackTime.store";
+import jukeboxReduxStore from "./redux/jukebox-redux-store";
+import {WebInterfacePageThing} from "./WebInterfacePageThing";
+import CurrentlyPlayingTrackInfo from "./components/CurrentlyPlayingTrackInfo";
 
 const mopidy = SingletonMopidyPlaybackManager.getMopidyInstance();
 
+
 export function JukeboxWebInterface() {
     const [searchResults, updateSearchResults] = useState([]);
+    const [isConnected, updateIsConnected] = useState(false);
     const [currentlyPlayingTrack, updateCurrentlyPlayingTrack] = useState(null);
     const [currentlyPlayingTrackImage, updateCurrentlyPlayingTrackImage] = useState({});
     const [searchResultImages, updateSearchResultTrackImages] = useState({});
     const [currentlyViewingIndex, updateCurrentlyViewingIndex] = useState(null);
 
     async function updateCurrentlyPlayingTrackInfo() {
-        const currentlyPlayingTrack = await SingletonMopidyPlaybackManager.getCurrentlyPlayingTrack();
-        updateCurrentlyPlayingTrack(currentlyPlayingTrack);
-        await SingletonMopidyPlaybackManager.getImagesForTracks([currentlyPlayingTrack], (images) => {
-            updateCurrentlyPlayingTrackImage(images);
-        });
+        const trackInfo = await SingletonMopidyPlaybackManager.getCurrentlyPlayingTrack();
+        updateCurrentlyPlayingTrack(trackInfo);
+        const trackImage = await SingletonMopidyPlaybackManager.getImagesForTracks([trackInfo]);
+        return {
+            trackInfo,
+            trackImage,
+        };
     }
 
-    async function dispatchCurrentPlaybackTime() {
+    async function dispatchPlay() {
+        const currentlyPlayingTrack = await updateCurrentlyPlayingTrackInfo();
         const currentPlaybackTime = await SingletonMopidyPlaybackManager.getCurrentPlaybackTime();
 
-        currentPlaybackTimeStore.dispatch({
+        jukeboxReduxStore.dispatch({
             type: 'playback/play',
-            payload: {playbackTime: currentPlaybackTime}
+            payload: {playbackTime: currentPlaybackTime, currentlyPlayingTrack}
         })
+    }
+
+    function dispatchStopPlaybackTimer() {
+        jukeboxReduxStore.dispatch({type: 'playback/stop'});
     }
 
     useEffect(() => {
@@ -39,28 +50,32 @@ export function JukeboxWebInterface() {
                 await SingletonMopidyPlaybackManager.getListOfPlaylists();
                 await performDefaultSearch('Mac Miller');
                 if (await SingletonMopidyPlaybackManager.getPlaybackState() === 'playing') {
-                    await dispatchCurrentPlaybackTime();
+                    await dispatchPlay();
                 }
+                updateIsConnected(true);
+            },
+            offline: async () => {
+                updateIsConnected(false);
             },
             trackPlaybackStarted: async () => {
-                await updateCurrentlyPlayingTrackInfo();
-                await dispatchCurrentPlaybackTime()
+                await dispatchPlay()
             },
             trackPlaybackEnded: async () => {
-                currentPlaybackTimeStore.dispatch({type: 'playback/stop'});
+                dispatchStopPlaybackTimer();
             },
             playbackStateChanged: async ({old_state, new_state}) => {
-                if (new_state !== 'playing') {
-                    // clearInterval(interval)
-                }
             }
         })
-        // return () => clearInterval(interval);
     }, []);
+
+    const fetch = async () => {
+        const searchResultImages = await SingletonMopidyPlaybackManager.getImagesForTracks(searchResults);
+        updateSearchResultTrackImages(searchResultImages);
+    }
 
     useEffect(() => {
         mopidy.on('event:trackPlaybackStarted', getTrackPlaybackStartedHandler())
-        SingletonMopidyPlaybackManager.getImagesForTracks(searchResults, updateSearchResultTrackImages);
+        fetch();
     }, [searchResults]);
 
     const getTrackPlaybackStartedHandler = () => {
@@ -80,7 +95,6 @@ export function JukeboxWebInterface() {
     }
 
     const playSongAtIndex = async (index) => {
-        console.error('playing song at index: ', index);
         const track = searchResults[index];
         await SingletonMopidyPlaybackManager.clearAllAndPlay(track);
         updateCurrentlyPlayingTrack(track);
@@ -103,78 +117,52 @@ export function JukeboxWebInterface() {
         setAnchorEl(null);
     };
 
-    const currentlyPlayingSongImageUrl = currentlyPlayingTrack && currentlyPlayingTrackImage && currentlyPlayingTrackImage[currentlyPlayingTrack.uri] ?
-        currentlyPlayingTrackImage[currentlyPlayingTrack.uri][0].uri :
-        '';
-
     return <div className={'jukebox-web-interface'}>
         <div className={'currently-playing-toolbar'}>
-            <div className={'album-art-with-song-info'}>
-                {currentlyPlayingTrack && currentlyPlayingSongImageUrl &&
-                <div className={'currently-playing-album-art-container'}>
-                    <img
-                        src={currentlyPlayingSongImageUrl}
-                        alt={"currently playing"}
-                        width={64}
-                        height={64}/>
-                </div>
-                }
-                <div>
-                    <div>
-                        {currentlyPlayingTrack ? currentlyPlayingTrack.name : "-"}
-                    </div>
-                    <div>
-                        {currentlyPlayingTrack ? currentlyPlayingTrack.artists[0].name : "-"}
-                    </div>
-                </div>
-            </div>
+            <CurrentlyPlayingTrackInfo />
             <PlaybackControls
                 currentlyPlayingTrack={currentlyPlayingTrack}
             />
             <VolumeControls/>
         </div>
-        <SearchBar updateTracks={updateSearchResults}/>
-        <div style={{textAlign: "center"}}>
-            <div
-                style={{display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "center"}}>
-                {
-                    searchResults.length && searchResultImages !== {} && searchResults.map((track, index) => {
-                        const imageUrl = searchResultImages && searchResultImages[track.uri] ?
-                            searchResultImages[track.uri][0].uri :
-                            '';
-                        return (
-                            <div style={{
-                                display: 'flex',
-                                flexDirection: 'column',
-                                padding: '16px',
-                                alignItems: 'center',
-                                width: '20%'
-                            }}>
-                                <div>
-                                    <img
-                                        id={`album-art-${index}`}
-                                        onClick={(event) => handleSongClick(event, index)}
-                                        src={imageUrl}
-                                        alt={'album art'}
-                                        width={200}
-                                        height={200}
-                                    />
-                                </div>
-                                <div>
-                                    {track.name} - {track.artists[0].name}
-                                </div>
-                            </div>
-                        )
-                    })
-                }
-                <TrackPlaybackMenu anchorEl={anchorEl} onClose={handlePopoverClose} onClick={() => {
-                    handlePopoverClose();
-                    return playSongAtIndex(currentlyViewingIndex);
-                }} onClick1={() => {
-                    handlePopoverClose();
-                    return addSongAtIndexToQueue(currentlyViewingIndex);
-                }}/>
-            </div>
-        </div>
+        {isConnected ?
+            <WebInterfacePageThing updateTracks={updateSearchResults} searchResults={searchResults}
+                                searchResultImages={searchResultImages} callbackfn={(track, index) => {
+            const imageUrl = searchResultImages && searchResultImages[track.uri] ?
+                searchResultImages[track.uri][0].uri :
+                '';
+            return (
+                <div style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    padding: '16px',
+                    alignItems: 'center',
+                    width: '20%'
+                }}>
+                    <div>
+                        <img
+                            id={`album-art-${index}`}
+                            onClick={(event) => handleSongClick(event, index)}
+                            src={imageUrl}
+                            alt={'album art'}
+                            width={200}
+                            height={200}
+                        />
+                    </div>
+                    <div>
+                        {track.name} - {track.artists[0].name}
+                    </div>
+                </div>
+            )
+        }} anchorEl={anchorEl} onClose={handlePopoverClose} onClick={() => {
+            handlePopoverClose();
+            return playSongAtIndex(currentlyViewingIndex);
+        }} onClick1={() => {
+            handlePopoverClose();
+            return addSongAtIndexToQueue(currentlyViewingIndex);
+        }}/> :
+        <div>
+            Please wait while we get your device set up.
+        </div>}
     </div>;
 }

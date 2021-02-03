@@ -2,10 +2,10 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './App';
 import {Provider} from 'react-redux';
-import currentPlaybackTimeStore from "./redux/stores/currentPlaybackTime.store";
+import jukeboxReduxStore from "./redux/jukebox-redux-store";
 
 ReactDOM.render(
-    <Provider store={currentPlaybackTimeStore}>
+    <Provider store={jukeboxReduxStore}>
         <App/>
     </Provider>,
     document.getElementById("root")

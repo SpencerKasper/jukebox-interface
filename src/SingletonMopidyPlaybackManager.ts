@@ -2,6 +2,7 @@ import Mopidy from "mopidy";
 
 export interface MopidyEventCallbacks {
     online?: () => Promise<void>;
+    offline?: () => Promise<void>;
     tracklistChanged?: () => Promise<void>;
     trackPlaybackStarted?: () => Promise<void>;
     trackPlaybackEnded?: () => Promise<void>;
@@ -13,6 +14,7 @@ export class SingletonMopidyPlaybackManager {
 
     static async startMopidy({
                                  online,
+        offline,
                                  tracklistChanged,
                                  trackPlaybackStarted,
                                  trackPlaybackEnded,
@@ -22,6 +24,7 @@ export class SingletonMopidyPlaybackManager {
         // @ts-ignore
         window.mopidy = mopidyInstance;
         mopidyInstance.on("state:online", online);
+        mopidyInstance.on('state:offline', offline)
         mopidyInstance.on('event:playbackStateChanged', playbackStateChanged);
         tracklistChanged && mopidyInstance.on('event:tracklistChanged', tracklistChanged);
         mopidyInstance.on('event:trackPlaybackEnded', trackPlaybackEnded);
@@ -73,7 +76,6 @@ export class SingletonMopidyPlaybackManager {
     }
 
     static async stop() {
-        console.error('stop is called')
         const mopidyInstance = SingletonMopidyPlaybackManager.getMopidyInstance();
         await mopidyInstance.playback.stop();
     }
@@ -88,17 +90,15 @@ export class SingletonMopidyPlaybackManager {
         return await mopidyInstance.library.search({query: {[queryField]: [searchTerm]}});
     }
 
-    static async getImagesForTracks(tracks, callback) {
+    static async getImagesForTracks(tracks) {
         const mopidyInstance = SingletonMopidyPlaybackManager.getMopidyInstance();
         const filteredTracks = tracks.filter(track => track);
         if (filteredTracks.length > 0) {
             const uris = filteredTracks.map(track => track.uri);
-            mopidyInstance.library
-                .getImages({uris})
-                .then((result) => callback(result));
-        } else {
-            callback([]);
+            return mopidyInstance.library
+                .getImages({uris});
         }
+        return [];
     }
 
     static async getPlaybackState() {
@@ -151,5 +151,10 @@ export class SingletonMopidyPlaybackManager {
     static async getMute() {
         const mopidyInstance = SingletonMopidyPlaybackManager.getMopidyInstance();
         return await mopidyInstance.mixer.getMute();
+    }
+
+    static async getMopidyConnectionStatus() {
+        const mopidyInstance = SingletonMopidyPlaybackManager.getMopidyInstance();
+        return mopidyInstance && mopidyInstance.playback && mopidyInstance.playback.getState() !== 'offline';
     }
 }

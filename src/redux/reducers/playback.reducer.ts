@@ -1,8 +1,12 @@
 import {SingletonMopidyPlaybackManager} from "../../SingletonMopidyPlaybackManager";
-import currentPlaybackTimeStore from "../stores/currentPlaybackTime.store";
+import jukeboxReduxStore from "../jukebox-redux-store";
 
 const initialState = {
     playbackTime: 0,
+    currentlyPlayingTrack: {
+        trackImage: undefined,
+        trackInfo: undefined,
+    }
 };
 
 let interval;
@@ -10,7 +14,7 @@ let interval;
 const beginPlaybackTimeQueryLoop = () => {
     interval = setInterval(async () => {
         const playbackTime = await SingletonMopidyPlaybackManager.getCurrentPlaybackTime();
-        currentPlaybackTimeStore.dispatch({type: 'playback/updateTime', payload: {playbackTime}});
+        jukeboxReduxStore.dispatch({type: 'playback/updateTime', payload: {playbackTime}});
     }, 1000);
 }
 
@@ -18,13 +22,14 @@ const cancelPlaybackTimeQueryLoop = () => {
     clearInterval(interval);
 }
 
-export default function currentPlaybackTimeReducer(state = initialState, action) {
+export default function playbackReducer(state = initialState, action) {
     switch (action.type) {
         case 'playback/play':
             beginPlaybackTimeQueryLoop();
             return {
                 ...state,
-                playbackTime: action.payload,
+                playbackTime: action.payload.playbackTime,
+                currentlyPlayingTrack: action.payload.currentlyPlayingTrack,
             }
         case 'playback/updateTime': {
             return {

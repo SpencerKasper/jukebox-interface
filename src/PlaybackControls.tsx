@@ -6,13 +6,12 @@ import stopButtonSvg from './static/images/stop-button.svg';
 import resumeButtonSvg from './static/images/play-button.svg';
 import {JukeboxSlider} from "./theme/JukeboxSlider";
 import {useSelector} from 'react-redux';
-import currentPlaybackTimeStore from "./redux/stores/currentPlaybackTime.store";
+import jukeboxReduxStore from "./redux/jukebox-redux-store";
 
 function PlaybackControls({
                               currentlyPlayingTrack,
                           }) {
-    const currentPlaybackTime = useSelector((state) => state.playbackTime);
-
+    const playbackState = useSelector((state) => state.playback);
     const totalSongLengthInSeconds = currentlyPlayingTrack ?
         currentlyPlayingTrack.length :
         0;
@@ -30,12 +29,12 @@ function PlaybackControls({
 
     return (
         <div className={'playback-controls'}>
-            <JukeboxSlider defaultValue={currentPlaybackTime.playbackTime}
+            <JukeboxSlider defaultValue={playbackState.playbackTime.playbackTime}
                            min={0} step={1} max={totalSongLengthInSeconds} onMouseDown={() => {
-                currentPlaybackTimeStore.dispatch({type: 'playback/stop'});
+                jukeboxReduxStore.dispatch({type: 'playback/stop'});
             }} onMouseUp={async () => {
                 const resumePlaybackTime = await SingletonMopidyPlaybackManager.getCurrentPlaybackTime();
-                currentPlaybackTimeStore.dispatch({type: 'playback/play', payload: {playbackTime: resumePlaybackTime}})
+                jukeboxReduxStore.dispatch({type: 'playback/play', payload: {playbackTime: resumePlaybackTime}})
             }} onChangeCommitted={async (event, newValue) => {
                 await SingletonMopidyPlaybackManager.seek(newValue as number);
             }} valueLabelFormat={getLabelValueFormatter()}/>
