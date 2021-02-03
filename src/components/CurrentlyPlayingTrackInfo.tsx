@@ -3,9 +3,9 @@ import {useSelector} from 'react-redux';
 
 const CurrentlyPlayingTrackInfo = () => {
     const currentlyPlayingTrack = useSelector((state) => state.playback.currentlyPlayingTrack);
-    const {trackImage, trackInfo} = currentlyPlayingTrack;
-
-    const currentlyPlayingSongImageUrl = trackImage && trackImage[trackInfo.uri] ?
+    const trackImage = currentlyPlayingTrack ? currentlyPlayingTrack.trackImage : null;
+    const trackInfo = currentlyPlayingTrack ? currentlyPlayingTrack.trackInfo : null;
+    const currentlyPlayingSongImageUrl = trackImage && trackInfo && trackImage[trackInfo.uri] ?
         trackImage[trackInfo.uri][0].uri :
         '';
 

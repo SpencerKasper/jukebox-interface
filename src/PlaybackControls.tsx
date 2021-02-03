@@ -8,13 +8,13 @@ import {JukeboxSlider} from "./theme/JukeboxSlider";
 import {useSelector} from 'react-redux';
 import jukeboxReduxStore from "./redux/jukebox-redux-store";
 
-function PlaybackControls({
-                              currentlyPlayingTrack,
-                          }) {
+function PlaybackControls() {
     const playbackState = useSelector((state) => state.playback);
-    const totalSongLengthInSeconds = currentlyPlayingTrack ?
-        currentlyPlayingTrack.length :
+    console.error(playbackState);
+    const totalSongLengthInSeconds = playbackState.currentlyPlayingTrack && playbackState.currentlyPlayingTrack.trackInfo ?
+        playbackState.currentlyPlayingTrack.trackInfo.length :
         0;
+    console.error(`total: ${totalSongLengthInSeconds}`)
 
     const getLabelValueFormatter = () => (value) => {
         const totalSeconds = value / 1000;
@@ -29,13 +29,16 @@ function PlaybackControls({
 
     return (
         <div className={'playback-controls'}>
-            <JukeboxSlider defaultValue={playbackState.playbackTime.playbackTime}
+            <JukeboxSlider defaultValue={playbackState.playbackTime}
                            min={0} step={1} max={totalSongLengthInSeconds} onMouseDown={() => {
+                console.error('stop');
                 jukeboxReduxStore.dispatch({type: 'playback/stop'});
             }} onMouseUp={async () => {
+                console.error('play')
                 const resumePlaybackTime = await SingletonMopidyPlaybackManager.getCurrentPlaybackTime();
                 jukeboxReduxStore.dispatch({type: 'playback/play', payload: {playbackTime: resumePlaybackTime}})
             }} onChangeCommitted={async (event, newValue) => {
+                console.error('commit');
                 await SingletonMopidyPlaybackManager.seek(newValue as number);
             }} valueLabelFormat={getLabelValueFormatter()}/>
             <div className={'playback-buttons'}>

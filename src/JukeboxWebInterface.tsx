@@ -1,8 +1,6 @@
 import React, {useEffect, useState} from "react";
 import {SingletonMopidyPlaybackManager} from "./SingletonMopidyPlaybackManager";
-import {TrackPlaybackMenu} from "./TrackPlaybackMenu";
 import PlaybackControls from "./PlaybackControls";
-import {SearchBar} from "./SearchBar";
 import {VolumeControls} from "./VolumeControls";
 import jukeboxReduxStore from "./redux/jukebox-redux-store";
 import {WebInterfacePageThing} from "./WebInterfacePageThing";
@@ -14,14 +12,11 @@ const mopidy = SingletonMopidyPlaybackManager.getMopidyInstance();
 export function JukeboxWebInterface() {
     const [searchResults, updateSearchResults] = useState([]);
     const [isConnected, updateIsConnected] = useState(false);
-    const [currentlyPlayingTrack, updateCurrentlyPlayingTrack] = useState(null);
-    const [currentlyPlayingTrackImage, updateCurrentlyPlayingTrackImage] = useState({});
     const [searchResultImages, updateSearchResultTrackImages] = useState({});
     const [currentlyViewingIndex, updateCurrentlyViewingIndex] = useState(null);
 
-    async function updateCurrentlyPlayingTrackInfo() {
+    async function getCurrentlyPlayingTrackInfo() {
         const trackInfo = await SingletonMopidyPlaybackManager.getCurrentlyPlayingTrack();
-        updateCurrentlyPlayingTrack(trackInfo);
         const trackImage = await SingletonMopidyPlaybackManager.getImagesForTracks([trackInfo]);
         return {
             trackInfo,
@@ -29,8 +24,8 @@ export function JukeboxWebInterface() {
         };
     }
 
-    async function dispatchPlay() {
-        const currentlyPlayingTrack = await updateCurrentlyPlayingTrackInfo();
+    async function dispatchCurrentlyPlayingChanged() {
+        const currentlyPlayingTrack = await getCurrentlyPlayingTrackInfo();
         const currentPlaybackTime = await SingletonMopidyPlaybackManager.getCurrentPlaybackTime();
 
         jukeboxReduxStore.dispatch({
@@ -46,11 +41,10 @@ export function JukeboxWebInterface() {
     useEffect(() => {
         SingletonMopidyPlaybackManager.startMopidy({
             online: async () => {
-                await updateCurrentlyPlayingTrackInfo();
                 await SingletonMopidyPlaybackManager.getListOfPlaylists();
                 await performDefaultSearch('Mac Miller');
                 if (await SingletonMopidyPlaybackManager.getPlaybackState() === 'playing') {
-                    await dispatchPlay();
+                    await dispatchCurrentlyPlayingChanged();
                 }
                 updateIsConnected(true);
             },
@@ -58,7 +52,7 @@ export function JukeboxWebInterface() {
                 updateIsConnected(false);
             },
             trackPlaybackStarted: async () => {
-                await dispatchPlay()
+                await dispatchCurrentlyPlayingChanged()
             },
             trackPlaybackEnded: async () => {
                 dispatchStopPlaybackTimer();
@@ -74,19 +68,8 @@ export function JukeboxWebInterface() {
     }
 
     useEffect(() => {
-        mopidy.on('event:trackPlaybackStarted', getTrackPlaybackStartedHandler())
         fetch();
     }, [searchResults]);
-
-    const getTrackPlaybackStartedHandler = () => {
-        return async (newTrack) => {
-            searchResults.forEach((track, index) => {
-                if (track.uri === newTrack.tl_track.track.uri) {
-                    updateCurrentlyPlayingTrack(track);
-                }
-            })
-        }
-    }
 
     const performDefaultSearch = async (searchTerm) => {
         const result = await SingletonMopidyPlaybackManager.search('artist', searchTerm);
@@ -97,7 +80,7 @@ export function JukeboxWebInterface() {
     const playSongAtIndex = async (index) => {
         const track = searchResults[index];
         await SingletonMopidyPlaybackManager.clearAllAndPlay(track);
-        updateCurrentlyPlayingTrack(track);
+        await dispatchCurrentlyPlayingChanged();
     }
 
     const addSongAtIndexToQueue = async (index) => {
@@ -120,9 +103,7 @@ export function JukeboxWebInterface() {
     return <div className={'jukebox-web-interface'}>
         <div className={'currently-playing-toolbar'}>
             <CurrentlyPlayingTrackInfo />
-            <PlaybackControls
-                currentlyPlayingTrack={currentlyPlayingTrack}
-            />
+            <PlaybackControls />
             <VolumeControls/>
         </div>
         {isConnected ?

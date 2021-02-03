@@ -29,12 +29,12 @@ export default function playbackReducer(state = initialState, action) {
             return {
                 ...state,
                 playbackTime: action.payload.playbackTime,
-                currentlyPlayingTrack: action.payload.currentlyPlayingTrack,
+                ...(action.payload.currentlyPlayingTrack && {currentlyPlayingTrack: action.payload.currentlyPlayingTrack}),
             }
         case 'playback/updateTime': {
             return {
                 ...state,
-                playbackTime: action.payload
+                playbackTime: action.payload.playbackTime
             }
         }
         case 'playback/stop': {
