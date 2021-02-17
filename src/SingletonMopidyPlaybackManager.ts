@@ -42,6 +42,15 @@ export class SingletonMopidyPlaybackManager {
         return SingletonMopidyPlaybackManager.mopidy;
     }
 
+    static async getCurrentlyPlayingTrackInfo() {
+        const trackInfo = await SingletonMopidyPlaybackManager.getCurrentlyPlayingTrack();
+        const trackImage = await SingletonMopidyPlaybackManager.getImagesForTracks([trackInfo]);
+        return {
+            trackInfo,
+            trackImage,
+        };
+    }
+
     static async clearAllAndPlay(track) {
         const mopidyInstance = SingletonMopidyPlaybackManager.getMopidyInstance();
         await mopidyInstance.tracklist.clear();

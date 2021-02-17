@@ -1,8 +1,9 @@
 import React, {useState} from "react";
 import {SingletonMopidyPlaybackManager} from "./SingletonMopidyPlaybackManager";
 import {Button, TextField, Select, MenuItem} from "@material-ui/core";
+import jukeboxReduxStore from "./redux/jukebox-redux-store";
 
-export function SearchBar(props) {
+export function SearchBar() {
     const SEARCH_TYPES = [
         {value: 'track_name', name: 'Song Title'},
         {value: 'artist', name: 'Artist'},
@@ -20,7 +21,11 @@ export function SearchBar(props) {
     const search = async () => {
         const result = await SingletonMopidyPlaybackManager.search(selectedSearchType, searchValue);
         const allTracks = result[0].tracks;
-        props.updateTracks(allTracks);
+        const searchResultImages = await SingletonMopidyPlaybackManager.getImagesForTracks(allTracks);
+        jukeboxReduxStore.dispatch({
+            type: 'searchResults/setSearchResults',
+            payload: {tracks: allTracks, images: searchResultImages}
+        });
     }
 
     return <div className={"search-bar-container"}>
