@@ -5,6 +5,7 @@ import {VolumeControls} from "./VolumeControls";
 import jukeboxReduxStore from "./redux/jukebox-redux-store";
 import {SearchResultsPage} from "./SearchResultsPage";
 import CurrentlyPlayingTrackInfo from "./components/CurrentlyPlayingTrackInfo";
+import {ConnectingToPiView} from "./ConnectingToPiView";
 
 export function JukeboxWebInterface() {
     const [isConnected, updateIsConnected] = useState(false);
@@ -26,7 +27,12 @@ export function JukeboxWebInterface() {
     useEffect(() => {
         SingletonMopidyPlaybackManager.startMopidy({
             online: async () => {
-                await SingletonMopidyPlaybackManager.getListOfPlaylists();
+                const playlists = await SingletonMopidyPlaybackManager.getListOfPlaylists();
+                const tracksInPlaylist = await SingletonMopidyPlaybackManager.getTracksInPlaylist(playlists[10].uri);
+                const trackToPlay = await SingletonMopidyPlaybackManager.search('uri', tracksInPlaylist[0].uri);
+                await SingletonMopidyPlaybackManager.addSongToQueue(trackToPlay[0].tracks[0]);
+                console.error(trackToPlay[0].tracks[0]);
+                console.error(tracksInPlaylist);
                 await performDefaultSearch('Mac Miller');
                 if (await SingletonMopidyPlaybackManager.getPlaybackState() === 'playing') {
                     await dispatchCurrentlyPlayingChanged();
@@ -65,8 +71,6 @@ export function JukeboxWebInterface() {
         </div>
         {isConnected ?
             <SearchResultsPage /> :
-            <div>
-                Please wait while we get your device set up.
-            </div>}
+            <ConnectingToPiView/>}
     </div>;
 }

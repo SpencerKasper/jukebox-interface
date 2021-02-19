@@ -93,4 +93,11 @@
     width: 36px;
     height: 36px;
   }
+
+  .connecting-to-pi-view-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
 }

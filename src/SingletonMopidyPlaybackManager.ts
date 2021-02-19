@@ -124,6 +124,12 @@ export class SingletonMopidyPlaybackManager {
         const mopidyInstance = SingletonMopidyPlaybackManager.getMopidyInstance();
         const playlists = await mopidyInstance.playlists.asList();
         console.error(playlists);
+        return playlists;
+    }
+
+    static async getTracksInPlaylist(uri: string) {
+        const mopidyInstance = SingletonMopidyPlaybackManager.getMopidyInstance();
+        return await mopidyInstance.playlists.getItems({uri})
     }
 
     static async seek(newTimeInSeconds: number) {
