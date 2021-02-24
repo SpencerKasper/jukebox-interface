@@ -1,13 +1,19 @@
 import {JukeboxSlider} from "./theme/JukeboxSlider";
 import React, {useState} from "react";
 import {SingletonMopidyPlaybackManager} from "./SingletonMopidyPlaybackManager";
-import unmuted from './static/images/unmuted.svg';
-import muted from './static/images/muted.svg';
+import {IconButton} from "@material-ui/core";
+import {VolumeMute, VolumeUp} from "@material-ui/icons";
 
 export function VolumeControls() {
     const [volumeState, updateVolume] = useState({isMute: false, volume: 100});
 
-    return <div className={"to-center-playback"}>
+    const toggleMute = async () => {
+        const shouldMute = !volumeState.isMute;
+        await SingletonMopidyPlaybackManager.setMute(shouldMute);
+        updateVolume({...volumeState, isMute: shouldMute});
+    }
+
+    return (<div className={"to-center-playback"}>
         <div className={'volume-controls'}>
             <div className={'volume-slider'}>
                 <JukeboxSlider
@@ -21,14 +27,9 @@ export function VolumeControls() {
                     }}
                     valueLabelFormat={(value) => value}/>
             </div>
-            <div className={'mute-button'}
-                 onClick={async () => {
-                     const shouldMute = !volumeState.isMute;
-                     await SingletonMopidyPlaybackManager.setMute(shouldMute);
-                     updateVolume({...volumeState, isMute: shouldMute});
-                 }}>
-                <img src={volumeState.isMute ? muted : unmuted} height={36} width={36}/>
-            </div>
+            <IconButton onClick={toggleMute}>
+                {volumeState.isMute ? <VolumeMute/> : <VolumeUp/>}
+            </IconButton>
         </div>
-    </div>;
+    </div>);
 }

@@ -1,11 +1,9 @@
 import React, {useEffect, useState} from "react";
 import {SingletonMopidyPlaybackManager} from "./SingletonMopidyPlaybackManager";
-import PlaybackControls from "./PlaybackControls";
-import {VolumeControls} from "./VolumeControls";
 import jukeboxReduxStore from "./redux/jukebox-redux-store";
 import {SearchResultsPage} from "./SearchResultsPage";
-import CurrentlyPlayingTrackInfo from "./components/CurrentlyPlayingTrackInfo";
 import {ConnectingToPiView} from "./ConnectingToPiView";
+import {CurrentlyPlayingToolbar} from "./CurrentlyPlayingToolbar";
 
 export function JukeboxWebInterface() {
     const [isConnected, updateIsConnected] = useState(false);
@@ -64,13 +62,9 @@ export function JukeboxWebInterface() {
     }
 
     return <div className={'jukebox-web-interface'}>
-        <div className={'currently-playing-toolbar'}>
-            <CurrentlyPlayingTrackInfo/>
-            <PlaybackControls/>
-            <VolumeControls/>
-        </div>
+        <CurrentlyPlayingToolbar/>
         {isConnected ?
-            <SearchResultsPage /> :
+            <SearchResultsPage/> :
             <ConnectingToPiView/>}
     </div>;
 }

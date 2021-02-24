@@ -1,6 +1,7 @@
 #root {
   @import url('https://fonts.googleapis.com/css2?family=Play&display=swap');
   @import 'jukebox-web-interface';
+  @import 'ambient-mode-set-up-page';
   font-family: 'Play', sans-serif;
 }
 
@@ -10,4 +11,83 @@
 
 .btn-secondary {
   background: rgb(123, 93, 151);
+}
+
+.currently-playing-toolbar {
+  display: flex;
+  flex-direction: row;
+  background: #00ddff;
+  width: 100%;
+  bottom: 0;
+  padding: 16px;
+  position: fixed;
+}
+
+.currently-playing-album-art-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 0 16px;
+}
+
+.album-art-with-song-info {
+  width: 30%;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
+.slider {
+  width: 100%;
+}
+
+.playback-controls {
+  width: 40%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-content: center;
+  align-items: center;
+}
+
+.playback-buttons {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-content: center;
+  align-items: center;
+}
+
+.to-center-playback {
+  width: 30%;
+  display: flex;
+  justify-content: center;
+}
+
+.playback-svg {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+
+.volume-controls {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  justify-content: center;
+  align-content: center;
+}
+
+.volume-slider {
+  width: 50%;
+  padding-right: 16px;
+}
+
+.mute-button {
+  width: 36px;
+  height: 36px;
 }

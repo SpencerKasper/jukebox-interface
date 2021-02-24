@@ -1,20 +1,18 @@
 import {SingletonMopidyPlaybackManager} from "./SingletonMopidyPlaybackManager";
 import React from "react";
-import nextButtonSvg from './static/images/next-button.svg';
-import pauseButtonSvg from './static/images/pause-button.svg';
-import stopButtonSvg from './static/images/stop-button.svg';
-import resumeButtonSvg from './static/images/play-button.svg';
 import {JukeboxSlider} from "./theme/JukeboxSlider";
 import {useSelector} from 'react-redux';
 import jukeboxReduxStore from "./redux/jukebox-redux-store";
+import PlayArrowIcon from '@material-ui/icons/PlayArrow';
+import SkipNextIcon from '@material-ui/icons/SkipNext';
+import {IconButton} from "@material-ui/core";
+import {Pause, Stop} from "@material-ui/icons";
 
 function PlaybackControls() {
     const playbackState = useSelector((state) => state.playback);
-    console.error(playbackState);
     const totalSongLengthInSeconds = playbackState.currentlyPlayingTrack && playbackState.currentlyPlayingTrack.trackInfo ?
         playbackState.currentlyPlayingTrack.trackInfo.length :
         0;
-    console.error(`total: ${totalSongLengthInSeconds}`)
 
     const getLabelValueFormatter = () => (value) => {
         const totalSeconds = value / 1000;
@@ -31,47 +29,26 @@ function PlaybackControls() {
         <div className={'playback-controls'}>
             <JukeboxSlider defaultValue={playbackState.playbackTime}
                            min={0} step={1} max={totalSongLengthInSeconds} onMouseDown={() => {
-                console.error('stop');
                 jukeboxReduxStore.dispatch({type: 'playback/stop'});
             }} onMouseUp={async () => {
-                console.error('play')
                 const resumePlaybackTime = await SingletonMopidyPlaybackManager.getCurrentPlaybackTime();
                 jukeboxReduxStore.dispatch({type: 'playback/play', payload: {playbackTime: resumePlaybackTime}})
             }} onChangeCommitted={async (event, newValue) => {
-                console.error('commit');
                 await SingletonMopidyPlaybackManager.seek(newValue as number);
             }} valueLabelFormat={getLabelValueFormatter()}/>
             <div className={'playback-buttons'}>
-                <div className={'playback-svg'}>
-                    <img
-                        alt={'resume'}
-                        src={resumeButtonSvg}
-                        width={32}
-                        height={32}
-                        onClick={SingletonMopidyPlaybackManager.resume}/>
-                </div>
-                <div className={'playback-svg'}>
-                    <img alt={'pause'}
-                         src={pauseButtonSvg}
-                         width={48}
-                         height={48}
-                         onClick={SingletonMopidyPlaybackManager.pause}/>
-                </div>
-                <div className={'playback-svg'}>
-                    <img alt={'stop'}
-                         src={stopButtonSvg}
-                         width={24}
-                         height={24}
-                         onClick={SingletonMopidyPlaybackManager.stop}/>
-                </div>
-                <div className={'playback-svg'}>
-                    <img
-                        alt={'next'}
-                        src={nextButtonSvg}
-                        width={32}
-                        height={32}
-                        onClick={SingletonMopidyPlaybackManager.playNextSongInQueue}/>
-                </div>
+                <IconButton onClick={SingletonMopidyPlaybackManager.resume}>
+                    <PlayArrowIcon width={32} height={32}/>
+                </IconButton>
+                <IconButton onClick={SingletonMopidyPlaybackManager.pause}>
+                    <Pause width={32} height={32}/>
+                </IconButton>
+                <IconButton onClick={SingletonMopidyPlaybackManager.stop}>
+                    <Stop width={32} height={32}/>
+                </IconButton>
+                <IconButton onClick={SingletonMopidyPlaybackManager.playNextSongInQueue}>
+                    <SkipNextIcon/>
+                </IconButton>
             </div>
         </div>
     );

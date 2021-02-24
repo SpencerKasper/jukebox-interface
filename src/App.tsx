@@ -2,7 +2,7 @@ import React from 'react';
 import {BrowserRouter as Router, Route, Switch} from 'react-router-dom';
 import './static/scss/App.scss';
 import {JukeboxWebInterface} from "./JukeboxWebInterface";
-import {SingletonMopidyPlaybackManager} from "./SingletonMopidyPlaybackManager";
+import AmbientModeSetUpPage from "./pages/AmbientModeSetUpPage";
 
 function App() {
     return (
@@ -10,6 +10,9 @@ function App() {
             <Switch>
                 <Route exact path='/'>
                     <JukeboxWebInterface/>
+                </Route>
+                <Route path='/ambientSetUp'>
+                    <AmbientModeSetUpPage />
                 </Route>
             </Switch>
         </Router>
