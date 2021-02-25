@@ -85,9 +85,60 @@
 .volume-slider {
   width: 50%;
   padding-right: 16px;
+  display: flex;
+  align-items: center;
 }
 
 .mute-button {
   width: 36px;
   height: 36px;
+}
+
+.search-result-list-container {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+}
+
+.playlist-list-container {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+
+}
+
+.playlist-list-item {
+  width: 23%;
+  cursor: pointer;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+
+
+  .playlist-title {
+    min-height: 48px;
+  }
+}
+
+.playlist-image-container {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+
+  .playlist-singular-image {
+    width: 50%;
+    height: 50%;
+  }
+}
+
+.page-with-toolbar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 118px;
+  padding: 16px;
 }

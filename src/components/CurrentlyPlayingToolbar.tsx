@@ -1,4 +1,4 @@
-import CurrentlyPlayingTrackInfo from "./components/CurrentlyPlayingTrackInfo";
+import CurrentlyPlayingTrackInfo from "./CurrentlyPlayingTrackInfo";
 import PlaybackControls from "./PlaybackControls";
 import {VolumeControls} from "./VolumeControls";
 import React from "react";

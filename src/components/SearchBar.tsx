@@ -1,7 +1,7 @@
 import React, {useState} from "react";
-import {SingletonMopidyPlaybackManager} from "./SingletonMopidyPlaybackManager";
+import {SingletonMopidyPlaybackManager} from "../SingletonMopidyPlaybackManager";
 import {Button, TextField, Select, MenuItem} from "@material-ui/core";
-import jukeboxReduxStore from "./redux/jukebox-redux-store";
+import jukeboxReduxStore from "../redux/jukebox-redux-store";
 
 export function SearchBar() {
     const SEARCH_TYPES = [

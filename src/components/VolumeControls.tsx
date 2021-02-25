@@ -1,6 +1,6 @@
-import {JukeboxSlider} from "./theme/JukeboxSlider";
+import {JukeboxSlider} from "../theme/JukeboxSlider";
 import React, {useState} from "react";
-import {SingletonMopidyPlaybackManager} from "./SingletonMopidyPlaybackManager";
+import {SingletonMopidyPlaybackManager} from "../SingletonMopidyPlaybackManager";
 import {IconButton} from "@material-ui/core";
 import {VolumeMute, VolumeUp} from "@material-ui/icons";
 

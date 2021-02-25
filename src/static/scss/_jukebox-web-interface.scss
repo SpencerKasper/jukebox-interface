@@ -1,24 +1,16 @@
-.jukebox-web-interface {
+.search-type-container {
+  padding-right: 16px;
+}
+
+.search-bar-container {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+}
+
+.connecting-to-pi-view-container {
   display: flex;
   flex-direction: column;
+  justify-content: center;
   align-items: center;
-  margin-bottom: 118px;
-  padding: 16px;
-
-  .search-type-container {
-    padding-right: 16px;
-  }
-
-  .search-bar-container {
-    display: flex;
-    flex-direction: row;
-    align-items: flex-end;
-  }
-
-  .connecting-to-pi-view-container {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-  }
 }

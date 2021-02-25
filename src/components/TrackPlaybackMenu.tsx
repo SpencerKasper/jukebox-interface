@@ -1,8 +1,8 @@
 import {Menu, MenuItem} from "@material-ui/core";
 import {useSelector} from 'react-redux';
 import React from "react";
-import jukeboxReduxStore from "./redux/jukebox-redux-store";
-import {SingletonMopidyPlaybackManager} from "./SingletonMopidyPlaybackManager";
+import jukeboxReduxStore from "../redux/jukebox-redux-store";
+import {SingletonMopidyPlaybackManager} from "../SingletonMopidyPlaybackManager";
 
 export function TrackPlaybackMenu() {
     const trackPlaybackMenuState = useSelector((state) => {
