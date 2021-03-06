@@ -3,9 +3,13 @@ import {CurrentlyPlayingToolbar} from "../components/CurrentlyPlayingToolbar";
 import {SingletonMopidyPlaybackManager} from "../SingletonMopidyPlaybackManager";
 import PlaylistImage from "../components/PlaylistImage";
 import {ConnectingToPiView} from "../views/ConnectingToPiView";
+import axios from "axios";
+import {useSelector} from 'react-redux';
+import {toast} from "react-toastify";
 
 const AmbientModeSetUpPage = ({isConnected}) => {
     const [playlists, updatePlaylists] = useState([]);
+    const currentlyPlayingTrackInfo = useSelector((state) => state.playback.currentlyPlayingTrack.trackInfo);
 
     async function trySetUp() {
         if (isConnected) {
@@ -13,12 +17,18 @@ const AmbientModeSetUpPage = ({isConnected}) => {
         }
     }
 
-    async function addSongsInPlaylistToQueue(playlist) {
+    async function addSongsInPlaylistToAmbientQueue(playlist) {
         const tracks = await SingletonMopidyPlaybackManager.getTracksInPlaylist(playlist.uri);
-        for (let track of tracks) {
-            const fullTrack = await SingletonMopidyPlaybackManager.search('uri', track.uri);
-            await SingletonMopidyPlaybackManager.addSongToQueue(fullTrack[0].tracks[0]);
-        }
+        const trackUris = tracks.map(track => track.uri);
+        await axios.post(`${process.env.REACT_APP_JUKEBOX_API_DOMAIN}updateAmbientQueue`, {
+            ambientQueue: trackUris,
+            owner: 'Spencer Kasper',
+            currentPlayingTrackUri: currentlyPlayingTrackInfo ? currentlyPlayingTrackInfo.uri : '',
+        });
+        const messageForToast = `Added ${trackUris.length} song(s) to the ambient queue.`;
+        toast(messageForToast, {
+            type: 'success',
+        })
     }
 
     useEffect(() => {
@@ -28,7 +38,8 @@ const AmbientModeSetUpPage = ({isConnected}) => {
         isConnected ? <div className={'ambient-mode-set-up-page page-with-toolbar'}>
                 <div className={'playlist-list-container'}>
                     {playlists.map(playlist => {
-                        return <div className={'playlist-list-item'} onClick={() => addSongsInPlaylistToQueue(playlist)}>
+                        return <div className={'playlist-list-item'}
+                                    onClick={() => addSongsInPlaylistToAmbientQueue(playlist)}>
                             <PlaylistImage playlistUri={playlist.uri}/>
                             <div className={'playlist-title'}>
                                 {playlist.name}

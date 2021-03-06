@@ -3,6 +3,7 @@ import {useSelector} from 'react-redux';
 import React from "react";
 import jukeboxReduxStore from "../redux/jukebox-redux-store";
 import {SingletonMopidyPlaybackManager} from "../SingletonMopidyPlaybackManager";
+import {toast} from "react-toastify";
 
 export function TrackPlaybackMenu() {
     const trackPlaybackMenuState = useSelector((state) => {
@@ -38,8 +39,10 @@ export function TrackPlaybackMenu() {
         const {searchResults} = trackPlaybackMenuState;
         const {currentlyViewingIndex, tracks} = searchResults;
         const track = tracks[currentlyViewingIndex];
-        console.error('playing: ', track);
         await SingletonMopidyPlaybackManager.clearAllAndPlay(track);
+        toast(`Erased queue and now playing ${track.name} by ${track.artists[0].name}`, {
+            type: 'info',
+        });
         await dispatchCurrentlyPlayingChanged();
     }
 
