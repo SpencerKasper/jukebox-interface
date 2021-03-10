@@ -4,11 +4,15 @@ import React, {useEffect} from "react";
 import {useSelector} from 'react-redux';
 import AlbumArtWithPlaybackMenu from "../components/AlbumArtWithPlaybackMenu";
 import axios from "axios";
+import {JukeboxReduxStore} from "../redux/jukebox-redux-store";
 
 export function TrackSearchView() {
-    const searchResultTracks = useSelector((state) => ({tracks: state.searchResults.tracks, images: state.searchResults.images}));
+    const searchResultTracks = useSelector((state: JukeboxReduxStore) => ({
+        tracks: state.searchResults.tracks,
+        images: state.searchResults.images
+    }));
     return <div>
-        <SearchBar />
+        <SearchBar/>
         <div style={{textAlign: "center"}}>
             <div className={'search-result-list-container'}>
                 {
@@ -20,7 +24,7 @@ export function TrackSearchView() {
                         />
                     ))
                 }
-                <TrackPlaybackMenu />
+                <TrackPlaybackMenu/>
             </div>
         </div>
     </div>

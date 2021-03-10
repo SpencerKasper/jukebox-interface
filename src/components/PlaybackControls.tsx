@@ -2,14 +2,14 @@ import {SingletonMopidyPlaybackManager} from "../SingletonMopidyPlaybackManager"
 import React from "react";
 import {JukeboxSlider} from "../theme/JukeboxSlider";
 import {useSelector} from 'react-redux';
-import jukeboxReduxStore from "../redux/jukebox-redux-store";
+import jukeboxReduxStore, {JukeboxReduxStore} from "../redux/jukebox-redux-store";
 import PlayArrowIcon from '@material-ui/icons/PlayArrow';
 import SkipNextIcon from '@material-ui/icons/SkipNext';
 import {IconButton} from "@material-ui/core";
 import {Pause, Stop} from "@material-ui/icons";
 
 function PlaybackControls() {
-    const playbackState = useSelector((state) => state.playback);
+    const playbackState = useSelector((state: JukeboxReduxStore) => state.playback);
     const totalSongLengthInSeconds = playbackState.currentlyPlayingTrack && playbackState.currentlyPlayingTrack.trackInfo ?
         playbackState.currentlyPlayingTrack.trackInfo.length :
         0;

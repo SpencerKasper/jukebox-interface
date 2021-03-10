@@ -1,8 +1,9 @@
 import React from 'react';
 import {useSelector} from 'react-redux';
+import {JukeboxReduxStore} from "../redux/jukebox-redux-store";
 
 const CurrentlyPlayingTrackInfo = () => {
-    const currentlyPlayingTrack = useSelector((state) => state.playback.currentlyPlayingTrack);
+    const currentlyPlayingTrack = useSelector((state: JukeboxReduxStore) => state.playback.currentlyPlayingTrack);
     const trackImage = currentlyPlayingTrack ? currentlyPlayingTrack.trackImage : null;
     const trackInfo = currentlyPlayingTrack ? currentlyPlayingTrack.trackInfo : null;
     const currentlyPlayingSongImageUrl = trackImage && trackInfo && trackImage[trackInfo.uri] ?

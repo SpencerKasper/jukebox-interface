@@ -6,10 +6,11 @@ import {ConnectingToPiView} from "../views/ConnectingToPiView";
 import axios from "axios";
 import {useSelector} from 'react-redux';
 import {toast} from "react-toastify";
+import {JukeboxReduxStore} from "../redux/jukebox-redux-store";
 
 const AmbientModeSetUpPage = ({isConnected}) => {
     const [playlists, updatePlaylists] = useState([]);
-    const currentlyPlayingTrackInfo = useSelector((state) => state.playback.currentlyPlayingTrack.trackInfo);
+    const currentlyPlayingTrackInfo = useSelector((state: JukeboxReduxStore) => state.playback.currentlyPlayingTrack.trackInfo);
 
     async function trySetUp() {
         if (isConnected) {
