@@ -21,7 +21,7 @@ const AmbientModeSetUpPage = ({isConnected}) => {
     async function addSongsInPlaylistToAmbientQueue(playlist) {
         const tracks = await SingletonMopidyPlaybackManager.getTracksInPlaylist(playlist.uri);
         const trackUris = tracks.map(track => track.uri);
-        await axios.post(`${process.env.REACT_APP_JUKEBOX_API_DOMAIN}updateAmbientQueue`, {
+        await axios.post(`${process.env.REACT_APP_JUKEBOX_API_DOMAIN}ambientQueue/update`, {
             ambientQueue: trackUris,
             owner: 'Spencer Kasper',
             currentPlayingTrackUri: currentlyPlayingTrackInfo ? currentlyPlayingTrackInfo.uri : '',
